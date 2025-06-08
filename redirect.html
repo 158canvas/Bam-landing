@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redirecting...</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      text-align: center;
+      background: #f9f9f9;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    .button {
+      display: block;
+      margin: 1em auto;
+      padding: 0.75em 2em;
+      font-size: 1em;
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .note {
+      margin-top: 2em;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="product-name">Loading...</h1>
+  <a id="amazon-btn" class="button" style="display:none;" target="_blank">🛒 Buy on Amazon</a>
+  <a id="meesho-btn" class="button" style="display:none; background-color: #e91e63;" target="_blank">🛍️ Buy on Meesho</a>
+  <div class="note" id="note" style="display:none;">
+    You are being redirected to an external website to purchase the product.
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("v");
+    const apiUrl = "https://script.google.com/macros/s/AKfycbzIHsqeHMjE7huDUU5FoTazhT0uVFZ2KsanRWombdPGyol48eq21TfgfjFbW7WE5cc/exec" + productId; // replace this
+
+    async function fetchLinks() {
+      if (!productId) {
+        document.getElementById("product-name").textContent = "Invalid or missing product ID.";
+        return;
+      }
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.error) {
+          document.getElementById("product-name").textContent = data.error;
+          return;
+        }
+
+        document.getElementById("product-name").textContent = data.productName || "Product";
+
+        if (data.amazonIND) {
+          const amazonBtn = document.getElementById("amazon-btn");
+          amazonBtn.href = data.amazonIND;
+          amazonBtn.style.display = "inline-block";
+        }
+
+        if (data.meesho) {
+          const meeshoBtn = document.getElementById("meesho-btn");
+          meeshoBtn.href = data.meesho;
+          meeshoBtn.style.display = "inline-block";
+        }
+
+        document.getElementById("note").style.display = "block";
+
+      } catch (error) {
+        document.getElementById("product-name").textContent = "Error loading product info.";
+        console.error("Fetch error:", error);
+      }
+    }
+
+    fetchLinks();
+  </script>
+</body>
+</html>
