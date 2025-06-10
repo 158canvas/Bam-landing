@@ -1,91 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redirecting...</title>
+  <meta charset="UTF-8">
+  <title>Product Offers</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2em;
-      text-align: center;
-      background: #f9f9f9;
-    }
-    h1 {
-      font-size: 1.5em;
-      margin-bottom: 0.5em;
-    }
-    .button {
-      display: block;
-      margin: 1em auto;
-      padding: 0.75em 2em;
-      font-size: 1em;
-      background-color: #0073e6;
-      color: white;
-      border: none;
+    body { font-family: Arial; padding: 20px; }
+    .product {
+      border: 1px solid #ccc; padding: 12px; margin-bottom: 10px;
       border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
     }
-    .note {
-      margin-top: 2em;
-      font-size: 0.9em;
-      color: #555;
-    }
+    .product h3 { margin: 0 0 5px 0; }
+    a { display: block; margin-top: 6px; }
   </style>
 </head>
 <body>
-
-  <h1 id="product-name">Loading...</h1>
-  <a id="amazon-btn" class="button" style="display:none;" target="_blank">🛒 Buy on Amazon</a>
-  <a id="meesho-btn" class="button" style="display:none; background-color: #e91e63;" target="_blank">🛍️ Buy on Meesho</a>
-  <div class="note" id="note" style="display:none;">
-    You are being redirected to an external website to purchase the product.
-  </div>
+  <h2>🎁 Your Product Links</h2>
+  <div id="productList">Loading...</div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get("v");
-    const apiUrl = "https://script.google.com/macros/s/AKfycbw_wTg0aOablP0G1BWi_gGU06CcU_4MeBlmIUJQ4kbAQ-12Y0IOxZwtBmiHlh_NRHk/exec?v=" + productId;
+    const productId = new URLSearchParams(location.search).get("v");
 
-    async function fetchLinks() {
-      if (!productId) {
-        document.getElementById("product-name").textContent = "Invalid or missing product ID.";
-        return;
-      }
+    if (!productId) {
+      document.getElementById("productList").innerText = "❌ Product ID is missing from the URL.";
+    } else {
+      fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_DEPLOYMENT_ID/exec?v=${encodeURIComponent(productId)}`)
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("productList");
+          container.innerHTML = "";
 
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+          if (data.error) {
+            container.innerText = "❌ " + data.error;
+          } else if (data.products && data.products.length > 0) {
+            data.products.forEach(p => {
+              const div = document.createElement("div");
+              div.className = "product";
 
-        if (data.error) {
-          document.getElementById("product-name").textContent = data.error;
-          return;
-        }
+              div.innerHTML = `
+                <h3>${p.productName || "Unnamed Product"}</h3>
+                ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Amazon Link</a>` : ""}
+                ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Meesho Link</a>` : ""}
+              `;
 
-        document.getElementById("product-name").textContent = data.productName || "Product";
-
-        if (data.amazonIND) {
-          const amazonBtn = document.getElementById("amazon-btn");
-          amazonBtn.href = data.amazonIND;
-          amazonBtn.style.display = "inline-block";
-        }
-
-        if (data.meesho) {
-          const meeshoBtn = document.getElementById("meesho-btn");
-          meeshoBtn.href = data.meesho;
-          meeshoBtn.style.display = "inline-block";
-        }
-
-        document.getElementById("note").style.display = "block";
-
-      } catch (error) {
-        document.getElementById("product-name").textContent = "Error loading product info.";
-        console.error("Fetch error:", error);
-      }
+              container.appendChild(div);
+            });
+          } else {
+            container.innerText = "⚠️ No products found.";
+          }
+        })
+        .catch(err => {
+          document.getElementById("productList").innerText = "❌ Failed to load product data.";
+          console.error(err);
+        });
     }
-
-    fetchLinks();
   </script>
 </body>
 </html>
