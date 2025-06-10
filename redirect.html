@@ -24,7 +24,7 @@
 
     .container {
       padding: 1rem;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
     }
 
@@ -34,28 +34,36 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       padding: 1rem;
       margin-bottom: 1rem;
-      transition: transform 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    .product:hover {
-      transform: translateY(-2px);
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      flex: 1;
+      min-width: 150px;
     }
 
-    .product h3 {
-      margin: 0 0 0.5rem;
-      font-size: 1.2rem;
-      color: #222;
+    .product-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .product a {
-      display: inline-block;
-      margin-top: 0.5rem;
       padding: 0.5rem 0.75rem;
       text-decoration: none;
       border-radius: 6px;
       font-weight: 500;
       color: white;
-      transition: background-color 0.3s;
+      font-size: 0.95rem;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
     }
 
     .product a[href*="amazon"] {
@@ -86,7 +94,6 @@
 
   <script>
     const productId = new URLSearchParams(location.search).get("v");
-
     const productList = document.getElementById("productList");
 
     if (!productId) {
@@ -105,9 +112,11 @@
               div.className = "product";
 
               div.innerHTML = `
-                <h3>${p.productName || "Unnamed Product"}</h3>
-                ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Buy on Amazon</a>` : ""}
-                ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Buy on Meesho</a>` : ""}
+                <div class="product-name">${p.productName || "Unnamed Product"}</div>
+                <div class="product-links">
+                  ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Amazon</a>` : ""}
+                  ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Meesho</a>` : ""}
+                </div>
               `;
 
               productList.appendChild(div);
