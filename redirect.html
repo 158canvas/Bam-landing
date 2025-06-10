@@ -23,7 +23,7 @@
     if (!productId) {
       document.getElementById("productList").innerText = "❌ Product ID is missing from the URL.";
     } else {
-      fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_DEPLOYMENT_ID/exec?v=${encodeURIComponent(productId)}`)
+      fetch(`https://script.google.com/macros/s/AKfycbw_wTg0aOablP0G1BWi_gGU06CcU_4MeBlmIUJQ4kbAQ-12Y0IOxZwtBmiHlh_NRHk/exec?v=${encodeURIComponent(productId)}`)
         .then(res => res.json())
         .then(data => {
           const container = document.getElementById("productList");
