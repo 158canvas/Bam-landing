@@ -34,28 +34,32 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       padding: 1rem;
       margin-bottom: 1rem;
+    }
+
+    .product-content {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
+      align-items: flex-start;
       flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .product-name {
+      flex: 1;
       font-size: 1.1rem;
       font-weight: 600;
-      flex: 1;
-      min-width: 150px;
+      min-width: 120px;
+      color: #222;
     }
 
     .product-links {
       display: flex;
+      flex-direction: column;
       gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      flex-shrink: 0;
     }
 
-    .product a {
+    .product-links a {
       padding: 0.5rem 0.75rem;
       text-decoration: none;
       border-radius: 6px;
@@ -63,18 +67,18 @@
       color: white;
       font-size: 0.95rem;
       transition: background-color 0.3s ease;
-      white-space: nowrap;
+      text-align: center;
     }
 
-    .product a[href*="amazon"] {
+    .product-links a[href*="amazon"] {
       background-color: #ff9900;
     }
 
-    .product a[href*="meesho"] {
+    .product-links a[href*="meesho"] {
       background-color: #8a2be2;
     }
 
-    .product a:hover {
+    .product-links a:hover {
       opacity: 0.9;
     }
 
@@ -87,7 +91,7 @@
   </style>
 </head>
 <body>
-  <header>🎁 Available at These Stores </header>
+  <header>🎁 Exclusive Product Links</header>
   <div class="container">
     <div id="productList" class="message">Loading products...</div>
   </div>
@@ -112,10 +116,12 @@
               div.className = "product";
 
               div.innerHTML = `
-                <div class="product-name">${p.productName || "Unnamed Product"}</div>
-                <div class="product-links">
-                  ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Amazon</a>` : ""}
-                  ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Meesho</a>` : ""}
+                <div class="product-content">
+                  <div class="product-name">${p.productName || "Unnamed Product"}</div>
+                  <div class="product-links">
+                    ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Buy on Amazon</a>` : ""}
+                    ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Buy on Meesho</a>` : ""}
+                  </div>
                 </div>
               `;
 
