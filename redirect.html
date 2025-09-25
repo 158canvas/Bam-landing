@@ -12,7 +12,6 @@
       background-color: #f9f9f9;
       color: #333;
     }
-
     header {
       background-color: #4a90e2;
       color: white;
@@ -21,13 +20,11 @@
       font-size: 1.5rem;
       font-weight: 600;
     }
-
     .container {
       padding: 1rem;
       max-width: 700px;
       margin: auto;
     }
-
     .product {
       background-color: #fff;
       border-radius: 12px;
@@ -38,32 +35,27 @@
       align-items: center;
       gap: 1rem;
     }
-
     .product-thumb img {
       width: 80px;
       height: auto;
       border-radius: 8px;
     }
-
     .product-details {
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
-
     .product-name {
       font-size: 1.1rem;
       font-weight: 600;
       color: #222;
     }
-
     .product-links {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
     }
-
     .product-links a {
       padding: 0.5rem 0.75rem;
       text-decoration: none;
@@ -74,19 +66,9 @@
       transition: background-color 0.3s ease;
       text-align: center;
     }
-
-    .product-links a[href*="amazon"] {
-      background-color: #ff9900;
-    }
-
-    .product-links a[href*="meesho"] {
-      background-color: #8a2be2;
-    }
-
-    .product-links a:hover {
-      opacity: 0.9;
-    }
-
+    .product-links a[href*="amazon"] { background-color: #ff9900; }
+    .product-links a[href*="meesho"] { background-color: #8a2be2; }
+    .product-links a:hover { opacity: 0.9; }
     .message {
       text-align: center;
       font-size: 1.1rem;
@@ -106,15 +88,14 @@
     const productId = new URLSearchParams(location.search).get("v");
     const productList = document.getElementById("productList");
 
-    // Helper to generate Amazon thumbnail from a product link
     function getAmazonThumbnail(url) {
       try {
         const match = url.match(/\/dp\/([A-Z0-9]{10})/);
         if (match && match[1]) {
-          return `https://images-na.ssl-images-amazon.com/images/I/${match[1]}._SL150_.jpg`;
+          return `https://m.media-amazon.com/images/I/${match[1]}._SL150_.jpg`;
         }
       } catch(e) { console.error(e); }
-      return ""; // fallback if ASIN not found
+      return "";
     }
 
     // Case: No product ID
@@ -134,11 +115,10 @@
       `;
     } else {
       // Fetch product data from Apps Script
-      fetch(`https://script.google.com/macros/s/AKfycbxWHI4qotzZ3WhAVSIoBQJOnXI3VDNASOrwaIty5A5jsppXU1UpvjGAEqnzy3OGAyo/exec?v=${encodeURIComponent(productId)}`)
+      fetch(`YOUR_SCRIPT_URL?v=${encodeURIComponent(productId)}`)
         .then(res => res.json())
         .then(data => {
           if (data.error || !data.products || data.products.length === 0) {
-            // fallback to Best Offer
             window.location.href = DEFAULT_AMAZON;
             return;
           }
@@ -147,16 +127,16 @@
 
           data.products.forEach(p => {
             const thumb = p.amazonIND ? getAmazonThumbnail(p.amazonIND) : "";
-
+            const title = p.name && p.name.trim() ? p.name : "Best Offer"; // use Column D
             const div = document.createElement("div");
             div.className = "product";
 
             div.innerHTML = `
               <div class="product-thumb">
-                ${thumb ? `<img src="${thumb}" alt="Best Offer">` : ""}
+                ${thumb ? `<img src="${thumb}" alt="${title}">` : ""}
               </div>
               <div class="product-details">
-                <div class="product-name">Best Offer</div>
+                <div class="product-name">${title}</div>
                 <div class="product-links">
                   ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Buy on Amazon</a>` : `<a href="${DEFAULT_AMAZON}" target="_blank">🛒 Buy on Amazon</a>`}
                   ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Buy on Meesho</a>` : ""}
