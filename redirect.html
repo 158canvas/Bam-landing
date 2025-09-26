@@ -106,6 +106,14 @@
     const productId = new URLSearchParams(location.search).get("v");
     const productList = document.getElementById("productList");
 
+    function redirectTo(url) {
+      try {
+        window.location.replace(url);
+      } catch (e) {
+        window.location.href = url;
+      }
+    }
+
     function displayProduct(product) {
       const div = document.createElement("div");
       div.className = "product";
@@ -125,33 +133,42 @@
       productList.appendChild(div);
     }
 
-    function fallbackProduct() {
-      displayProduct({
-        name: "Best Offer",
-        thumbnail: "https://images-na.ssl-images-amazon.com/images/I/61D9mH0wAOL._SL150_.jpg",
-        amazonIND: DEFAULT_AMAZON
-      });
+    function fallbackRedirect() {
+      redirectTo(DEFAULT_AMAZON);
     }
 
     if (!productId) {
-      fallbackProduct();
+      fallbackRedirect();
     } else {
       fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?v=${encodeURIComponent(productId)}`)
         .then(res => res.json())
         .then(data => {
           productList.innerHTML = "";
-          if (!data.products || data.products.length === 0) {
-            fallbackProduct();
+          if (!data || !Array.isArray(data.products) || data.products.length === 0) {
+            fallbackRedirect();
             return;
           }
 
+          const links = [];
           data.products.forEach(p => {
-            displayProduct(p);
+            if (p && typeof p === "object") {
+              if (p.amazonIND) links.push(p.amazonIND);
+              if (p.meesho) links.push(p.meesho);
+            }
           });
+
+          const validLinks = links.filter(u => typeof u === "string" && /^https?:\/\//i.test(u));
+
+          if (validLinks.length === 1) {
+            redirectTo(validLinks[0]);
+            return;
+          }
+
+          data.products.forEach(p => displayProduct(p));
         })
         .catch(err => {
           console.error(err);
-          fallbackProduct();
+          fallbackRedirect();
         });
     }
   </script>
