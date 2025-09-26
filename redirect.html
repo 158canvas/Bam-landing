@@ -201,7 +201,16 @@
       }
     }
 
+    // Helper function to safely access nested object properties
+    function getSafe(obj, path, defaultValue = null) {
+      return path.split('.').reduce((acc, key) => {
+        return acc && acc[key] !== undefined ? acc[key] : defaultValue;
+      }, obj);
+    }
+
     function displayProducts(data) {
+      console.log('Received data:', data); // Debug log
+      
       if (!data || !Array.isArray(data.products) || data.products.length === 0) {
         productList.innerHTML = '<div class="message">No products found. Redirecting...</div>';
         setTimeout(() => redirectTo("https://amzn.to/42beoLM"), 2000);
@@ -213,21 +222,34 @@
       data.products.forEach((product, index) => {
         if (!product) return;
         
+        console.log('Processing product:', product); // Debug log
+        
         const hasAmazon = isValidUrl(product.amazonIND);
         const hasMeesho = isValidUrl(product.meesho);
         
         if (!hasAmazon && !hasMeesho) return;
 
+        // Safely extract product data
+        const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
+                           product.productName || 
+                           "Best Offer";
+        
+        const thumbnail = getSafe(product, 'Images.Primary.Medium.URL') || 
+                         product.thumbnail;
+        
+        const price = getSafe(product, 'Offers.Listings.0.Price.DisplayAmount') || 
+                     product.price;
+
         html += `
           <div class="product">
-            ${product.thumbnail ? `
+            ${thumbnail ? `
               <div class="product-thumb">
-                <img src="${product.thumbnail}" alt="${product.productName}" onerror="this.style.display='none'">
+                <img src="${thumbnail}" alt="${productName}" onerror="this.style.display='none'">
               </div>
             ` : ''}
             <div class="product-details">
-              <div class="product-name">${product.productName}</div>
-              ${product.price ? `<div class="product-price">${product.price}</div>` : ''}
+              <div class="product-name">${productName}</div>
+              ${price ? `<div class="product-price">${price}</div>` : ''}
               <div class="product-links">
                 ${hasAmazon ? `
                   <a href="${product.amazonIND}" onclick="trackClick('${product.productId}', 'amazon')" target="_blank">
