@@ -102,74 +102,56 @@
   </div>
 
   <script>
-    const DEFAULT_AMAZON = "https://amzn.to/46LWGAa";
+    const DEFAULT_AMAZON = "https://amzn.to/42beoLM"; // fallback link
     const productId = new URLSearchParams(location.search).get("v");
     const productList = document.getElementById("productList");
 
-    // Case A: No product ID in URL
-    if (!productId) {
-      productList.innerHTML = `
-        <div class="product">
-          <div class="product-thumb">
-            <img src="https://images-na.ssl-images-amazon.com/images/I/61D9mH0wAOL._SL150_.jpg" alt="Best Offer">
-          </div>
-          <div class="product-details">
-            <div class="product-name">Best Offer</div>
-            <div class="product-links">
-              <a href="${DEFAULT_AMAZON}" target="_blank">🛒 Buy on Amazon</a>
-            </div>
+    function displayProduct(product) {
+      const div = document.createElement("div");
+      div.className = "product";
+
+      div.innerHTML = `
+        <div class="product-thumb">
+          ${product.thumbnail ? `<img src="${product.thumbnail}" alt="${product.name}">` : ""}
+        </div>
+        <div class="product-details">
+          <div class="product-name">${product.name || "Best Offer"}</div>
+          <div class="product-links">
+            ${product.amazonIND ? `<a href="${product.amazonIND}" target="_blank">🛒 Buy on Amazon</a>` : `<a href="${DEFAULT_AMAZON}" target="_blank">🛒 Buy on Amazon</a>`}
+            ${product.meesho ? `<a href="${product.meesho}" target="_blank">🛍 Buy on Meesho</a>` : ""}
           </div>
         </div>
       `;
+      productList.appendChild(div);
+    }
+
+    function fallbackProduct() {
+      displayProduct({
+        name: "Best Offer",
+        thumbnail: "https://images-na.ssl-images-amazon.com/images/I/61D9mH0wAOL._SL150_.jpg",
+        amazonIND: DEFAULT_AMAZON
+      });
+    }
+
+    if (!productId) {
+      fallbackProduct();
     } else {
-      // Case B: Product ID exists, fetch from Apps Script
-      fetch(`https://script.google.com/macros/s/AKfycbxWHI4qotzZ3WhAVSIoBQJOnXI3VDNASOrwaIty5A5jsppXU1UpvjGAEqnzy3OGAyo/exec?v=${encodeURIComponent(productId)}`)
+      fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?v=${encodeURIComponent(productId)}`)
         .then(res => res.json())
         .then(data => {
-          if (data.error || !data.products || data.products.length === 0) {
-            // fallback to Best Offer
-            productList.innerHTML = `
-              <div class="product">
-                <div class="product-thumb">
-                  <img src="https://images-na.ssl-images-amazon.com/images/I/61D9mH0wAOL._SL150_.jpg" alt="Best Offer">
-                </div>
-                <div class="product-details">
-                  <div class="product-name">Best Offer</div>
-                  <div class="product-links">
-                    <a href="${DEFAULT_AMAZON}" target="_blank">🛒 Buy on Amazon</a>
-                  </div>
-                </div>
-              </div>
-            `;
+          productList.innerHTML = "";
+          if (!data.products || data.products.length === 0) {
+            fallbackProduct();
             return;
           }
 
-          productList.innerHTML = "";
-
           data.products.forEach(p => {
-            const div = document.createElement("div");
-            div.className = "product";
-
-            div.innerHTML = `
-              <div class="product-thumb">
-                ${p.thumbnail ? `<img src="${p.thumbnail}" alt="${p.name}">` : ""}
-              </div>
-              <div class="product-details">
-                <div class="product-name">${p.name || "Best Offer"}</div>
-                <div class="product-links">
-                  ${p.amazonIND ? `<a href="${p.amazonIND}" target="_blank">🛒 Buy on Amazon</a>` : `<a href="${DEFAULT_AMAZON}" target="_blank">🛒 Buy on Amazon</a>`}
-                  ${p.meesho ? `<a href="${p.meesho}" target="_blank">🛍 Buy on Meesho</a>` : ""}
-                </div>
-              </div>
-            `;
-
-            productList.appendChild(div);
+            displayProduct(p);
           });
         })
         .catch(err => {
           console.error(err);
-          // fallback
-          window.location.href = DEFAULT_AMAZON;
+          fallbackProduct();
         });
     }
   </script>
