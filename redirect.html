@@ -176,15 +176,24 @@
       </div>
     </div>
     <div id="disclaimer" class="disclaimer" style="display: none;"></div>
+    <div id="errorLog" class="disclaimer" style="display: block; background-color: #ffebee; border-left: 4px solid #f44336; margin-top: 20px; white-space: pre-wrap; font-family: monospace; font-size: 12px;"></div>
   </div>
 
   <script>
     const productId = new URLSearchParams(location.search).get("v");
     const productList = document.getElementById("productList");
     const disclaimerEl = document.getElementById("disclaimer");
+    const errorLogEl = document.getElementById("errorLog");
 
-    // Updated to use the correct main script URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw92F3JBvKraFnX4TWfXFC7Yf4cjakpSmZBeF43rfyE7T2KHlOACz87hXrR9JbolSs/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
+    // Debug information
+    errorLogEl.innerHTML = `<strong>Debug Information:</strong>
+Product ID: ${productId || 'NONE'}
+Current URL: ${window.location.href}
+Script URL: ${document.currentScript.src}
+Time: ${new Date().toISOString()}`;
+
+    // Replace with your actual Google Apps Script Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQXnCgvYJKGXvQYQJRQDMKPYrLVxTyYdvnNzVJbMXYFGWpzJXJMZAJGQZXZXZXZXZX/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
 
     function redirectTo(url) {
       if (url && isValidUrl(url)) {
@@ -212,8 +221,7 @@
       console.log('Received data:', data); // Debug log
       
       if (!data || !Array.isArray(data.products) || data.products.length === 0) {
-        productList.innerHTML = '<div class="message">No products found. Redirecting...</div>';
-        setTimeout(() => redirectTo("https://amzn.to/42beoLM"), 2000);
+        productList.innerHTML = '<div class="message">No products found.</div>';
         return;
       }
 
@@ -268,8 +276,7 @@
       });
 
       if (html === '') {
-        productList.innerHTML = '<div class="message">No valid links found. Redirecting...</div>';
-        setTimeout(() => redirectTo("https://amzn.to/42beoLM"), 2000);
+        productList.innerHTML = '<div class="message">No valid links found.</div>';
         return;
       }
 
@@ -288,21 +295,28 @@
     }
 
     if (!productId) {
-      productList.innerHTML = '<div class="message">Invalid product ID. Redirecting...</div>';
-      setTimeout(() => redirectTo("https://amzn.to/42beoLM"), 2000);
+      productList.innerHTML = '<div class="message">Invalid product ID.</div>';
+      errorLogEl.innerHTML += `\n\nNo product ID provided in URL`;
     } else {
-      fetch(`${SCRIPT_URL}?v=${encodeURIComponent(productId)}`)
+      const requestUrl = `${SCRIPT_URL}?v=${encodeURIComponent(productId)}`;
+      errorLogEl.innerHTML += `\n\nFetching data from: ${requestUrl}`;
+      
+      fetch(requestUrl)
         .then(res => {
-          if (!res.ok) throw new Error('Network response was not ok');
+          errorLogEl.innerHTML += `\n\nResponse status: ${res.status} ${res.statusText}`;
+          if (!res.ok) {
+            throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
+          }
           return res.json();
         })
         .then(data => {
+          errorLogEl.innerHTML += `\n\nReceived data: ${JSON.stringify(data, null, 2).substring(0, 500)}...`;
           displayProducts(data);
         })
         .catch(err => {
-          console.error('Fetch error:', err);
-          productList.innerHTML = '<div class="message">Error loading products. Redirecting...</div>';
-          setTimeout(() => redirectTo("https://amzn.to/42beoLM"), 2000);
+          const errorMessage = err.toString();
+          errorLogEl.innerHTML += `\n\nFetch error: ${errorMessage}`;
+          productList.innerHTML = `<div class="message">Error loading products: ${errorMessage}</div>`;
         });
     }
   </script>
