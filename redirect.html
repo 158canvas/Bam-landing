@@ -184,6 +184,11 @@
     const productList = document.getElementById("productList");
     const disclaimerEl = document.getElementById("disclaimer");
     const errorLogEl = document.getElementById("errorLog");
+    const DEBUG = true;
+
+    if (DEBUG) {
+      errorLogEl.style.display = 'block';
+    }
 
     // Debug information
     errorLogEl.innerHTML = `<strong>Debug Information:</strong>
@@ -247,6 +252,19 @@ Time: ${new Date().toISOString()}`;
         
         const price = getSafe(product, 'Offers.Listings.0.Price.DisplayAmount') || 
                      product.price;
+
+        if (DEBUG) {
+          errorLogEl.innerHTML += `\n\nProduct ${index} parsed: ${JSON.stringify({
+            productId: product.productId,
+            productName,
+            amazonIND: product.amazonIND,
+            meesho: product.meesho,
+            thumbnail,
+            price,
+            hasAmazon,
+            hasMeesho
+          }, null, 2)}`;
+        }
 
         html += `
           <div class="product">
@@ -322,6 +340,3 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
-
-
-
