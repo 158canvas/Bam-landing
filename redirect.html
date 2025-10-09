@@ -250,6 +250,7 @@ Time: ${new Date().toISOString()}`;
           errorLogEl.innerHTML += `\n\nDiagnostics: products[0] missing`;
           return;
         }
+        const offersCount = Array.isArray(p.offers) ? p.offers.length : 0;
         const amazonLinks = Array.isArray(p.amazonLinks) ? p.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const meeshoLinks = Array.isArray(p.meeshoLinks) ? p.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const rawLegacyAmazon = typeof p.amazonIND === 'string' ? p.amazonIND : null;
@@ -269,7 +270,7 @@ Time: ${new Date().toISOString()}`;
           summary += `\n- ERROR: Amazon URL formatting issue (backticks/whitespace). Original: ${JSON.stringify(rawLegacyAmazon)} → Normalized: ${JSON.stringify(legacyAmazon)}`;
         }
 
-        errorLogEl.innerHTML += `\n\nDiagnostics:\n- amazonLinks: ${amazonLinks.length}\n- meeshoLinks: ${meeshoLinks.length}\n- legacyAmazonIND: ${legacyAmazonValid ? 'valid' : (legacyAmazon ? 'invalid' : 'absent')}\n- legacyMeesho: ${legacyMeeshoValid ? 'valid' : (legacyMeesho ? 'invalid' : 'absent')}\n${summary}`;
+        errorLogEl.innerHTML += `\n\nDiagnostics:\n- offers: ${offersCount}\n- amazonLinks: ${amazonLinks.length}\n- meeshoLinks: ${meeshoLinks.length}\n- legacyAmazonIND: ${legacyAmazonValid ? 'valid' : (legacyAmazon ? 'invalid' : 'absent')}\n- legacyMeesho: ${legacyMeeshoValid ? 'valid' : (legacyMeesho ? 'invalid' : 'absent')}\n${summary}`;
       } catch (e) {
         errorLogEl.innerHTML += `\n\nDiagnostics error: ${e.toString()}`;
       }
@@ -290,6 +291,7 @@ Time: ${new Date().toISOString()}`;
         
         console.log('Processing product:', product); // Debug log
         
+        const offers = Array.isArray(product.offers) ? product.offers : [];
         const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const legacyAmazonRaw = product.amazonIND;
@@ -299,7 +301,8 @@ Time: ${new Date().toISOString()}`;
         const legacyAmazonValid = legacyAmazon ? isValidUrl(legacyAmazon) : false;
         const legacyMeeshoValid = legacyMeesho ? isValidUrl(legacyMeesho) : false;
         
-        if (amazonLinks.length === 0 && meeshoLinks.length === 0 && !legacyAmazon && !legacyMeesho) return;
+        const hasAny = offers.length > 0 || amazonLinks.length > 0 || meeshoLinks.length > 0 || legacyAmazon || legacyMeesho;
+        if (!hasAny) return;
 
         // Safely extract product data
         const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
@@ -310,6 +313,7 @@ Time: ${new Date().toISOString()}`;
           errorLogEl.innerHTML += `\n\nProduct ${index} parsed: ${JSON.stringify({
             productId: product.productId,
             productName,
+            offersCount: offers.length,
             amazonLinksCount: amazonLinks.length,
             meeshoLinksCount: meeshoLinks.length,
             legacyAmazonPresent: legacyAmazonValid,
@@ -317,35 +321,63 @@ Time: ${new Date().toISOString()}`;
           }, null, 2)}`;
         }
 
-        html += `
-          <div class="product">
-            <div class="product-details">
-              <div class="product-name">${productName}</div>
-              <div class="product-links">
-                ${amazonLinks.map((link, idx) => `
-                  <a href="${link}" onclick="trackClick('${product.productId}', 'amazon-${idx+1}')" target="_blank">
-                    🛒 Buy on Amazon ${amazonLinks.length > 1 ? `#${idx+1}` : ''}
-                  </a>
-                `).join('')}
-                ${meeshoLinks.map((link, idx) => `
-                  <a href="${link}" onclick="trackClick('${product.productId}', 'meesho-${idx+1}')" target="_blank">
-                    🛍 Buy on Meesho ${meeshoLinks.length > 1 ? `#${idx+1}` : ''}
-                  </a>
-                `).join('')}
-                ${(!amazonLinks.length && legacyAmazonValid) ? `
-                  <a href="${legacyAmazon}" onclick="trackClick('${product.productId}', 'amazon-legacy')" target="_blank">
-                    🛒 Buy on Amazon
-                  </a>
-                ` : ''}
-                ${(!meeshoLinks.length && legacyMeeshoValid) ? `
-                  <a href="${legacyMeesho}" onclick="trackClick('${product.productId}', 'meesho-legacy')" target="_blank">
-                    🛍 Buy on Meesho
-                  </a>
-                ` : ''}
+        // Prefer structured offers with titles; fall back to aggregated arrays
+        if (offers.length > 0) {
+          const offerBlocks = offers.map((offer, oidx) => {
+            const offerTitle = (offer && offer.title) ? offer.title : productName;
+            const a = offer && offer.amazon ? normalizeUrl(offer.amazon) : null;
+            const m = offer && offer.meesho ? normalizeUrl(offer.meesho) : null;
+            const aValid = a ? isValidUrl(a) : false;
+            const mValid = m ? isValidUrl(m) : false;
+            if (!aValid && !mValid) return '';
+            return `
+              <div class="product">
+                <div class="product-details">
+                  <div class="product-name">${offerTitle}</div>
+                  <div class="product-links">
+                    ${aValid ? `
+                      <a href="${a}" onclick="trackClick('${product.productId}', 'amazon-offer-${oidx+1}')" target="_blank">🛒 Buy on Amazon</a>
+                    ` : ''}
+                    ${mValid ? `
+                      <a href="${m}" onclick="trackClick('${product.productId}', 'meesho-offer-${oidx+1}')" target="_blank">🛍 Buy on Meesho</a>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+          html += offerBlocks;
+        } else {
+          html += `
+            <div class="product">
+              <div class="product-details">
+                <div class="product-name">${productName}</div>
+                <div class="product-links">
+                  ${amazonLinks.map((link, idx) => `
+                    <a href="${link}" onclick="trackClick('${product.productId}', 'amazon-${idx+1}')" target="_blank">
+                      🛒 Buy on Amazon ${amazonLinks.length > 1 ? `#${idx+1}` : ''}
+                    </a>
+                  `).join('')}
+                  ${meeshoLinks.map((link, idx) => `
+                    <a href="${link}" onclick="trackClick('${product.productId}', 'meesho-${idx+1}')" target="_blank">
+                      🛍 Buy on Meesho ${meeshoLinks.length > 1 ? `#${idx+1}` : ''}
+                    </a>
+                  `).join('')}
+                  ${(!amazonLinks.length && legacyAmazonValid) ? `
+                    <a href="${legacyAmazon}" onclick="trackClick('${product.productId}', 'amazon-legacy')" target="_blank">
+                      🛒 Buy on Amazon
+                    </a>
+                  ` : ''}
+                  ${(!meeshoLinks.length && legacyMeeshoValid) ? `
+                    <a href="${legacyMeesho}" onclick="trackClick('${product.productId}', 'meesho-legacy')" target="_blank">
+                      🛍 Buy on Meesho
+                    </a>
+                  ` : ''}
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       });
 
       if (html === '') {
