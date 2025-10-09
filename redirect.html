@@ -198,7 +198,7 @@ Script URL: ${document.currentScript.src}
 Time: ${new Date().toISOString()}`;
 
     // Replace with your actual Google Apps Script Web App URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiOPytK82ScbsueSfWE-Zgmb956vOuISmNw6DBvW1ikCG3Yy4BYyajuoIXwWtiRbs/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTpm2on_KIKTquKxo-pyp7DxEChN5t_Ig7RU1QNWMteb_3_zFeVcbTHNhyfrv0e_I/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
 
     function redirectTo(url) {
       if (url && isValidUrl(url)) {
@@ -237,10 +237,10 @@ Time: ${new Date().toISOString()}`;
         
         console.log('Processing product:', product); // Debug log
         
-        const hasAmazon = isValidUrl(product.amazonIND);
-        const hasMeesho = isValidUrl(product.meesho);
+        const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.filter(isValidUrl) : [];
+        const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.filter(isValidUrl) : [];
         
-        if (!hasAmazon && !hasMeesho) return;
+        if (amazonLinks.length === 0 && meeshoLinks.length === 0) return;
 
         // Safely extract product data
         const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
@@ -251,10 +251,8 @@ Time: ${new Date().toISOString()}`;
           errorLogEl.innerHTML += `\n\nProduct ${index} parsed: ${JSON.stringify({
             productId: product.productId,
             productName,
-            amazonIND: product.amazonIND,
-            meesho: product.meesho,
-            hasAmazon,
-            hasMeesho
+            amazonLinksCount: amazonLinks.length,
+            meeshoLinksCount: meeshoLinks.length
           }, null, 2)}`;
         }
 
@@ -263,16 +261,16 @@ Time: ${new Date().toISOString()}`;
             <div class="product-details">
               <div class="product-name">${productName}</div>
               <div class="product-links">
-                ${hasAmazon ? `
-                  <a href="${product.amazonIND}" onclick="trackClick('${product.productId}', 'amazon')" target="_blank">
-                    🛒 Buy on Amazon
+                ${amazonLinks.map((link, idx) => `
+                  <a href="${link}" onclick="trackClick('${product.productId}', 'amazon-${idx+1}')" target="_blank">
+                    🛒 Buy on Amazon ${amazonLinks.length > 1 ? `#${idx+1}` : ''}
                   </a>
-                ` : ''}
-                ${hasMeesho ? `
-                  <a href="${product.meesho}" onclick="trackClick('${product.productId}', 'meesho')" target="_blank">
-                    🛍 Buy on Meesho
+                `).join('')}
+                ${meeshoLinks.map((link, idx) => `
+                  <a href="${link}" onclick="trackClick('${product.productId}', 'meesho-${idx+1}')" target="_blank">
+                    🛍 Buy on Meesho ${meeshoLinks.length > 1 ? `#${idx+1}` : ''}
                   </a>
-                ` : ''}
+                `).join('')}
               </div>
             </div>
           </div>
@@ -326,6 +324,5 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
-
 
 
