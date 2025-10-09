@@ -190,14 +190,18 @@
       errorLogEl.style.display = 'block';
     }
 
-    // Replace with your actual Google Apps Script Web App URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXrqSd1o1GVSbahcH4QBC70xR8Yq37ZxIY8JzeO9E3eI61dQK9c2hn3adOOME087A/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
+    // Build/version info and backend override for debugging cache/mismatch
+    const VERSION = '2025-10-09-1';
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXrqSd1o1GVSbahcH4QBC70xR8Yq37ZxIY8JzeO9E3eI61dQK9c2hn3adOOME087A/exec"; // IMPORTANT: replace with your deployed web app URL
+    const backendOverrideParam = new URLSearchParams(location.search).get("backend");
+    const SCRIPT_URL = backendOverrideParam ? decodeURIComponent(backendOverrideParam) : DEFAULT_SCRIPT_URL;
 
     // Debug information (placed after SCRIPT_URL is defined)
     errorLogEl.innerHTML = `<strong>Debug Information:</strong>
 Product ID: ${productId || 'NONE'}
 Current URL: ${window.location.href}
 Script URL (backend): ${SCRIPT_URL}
+Build Version: ${VERSION}
 Time: ${new Date().toISOString()}`;
 
     function redirectTo(url) {
@@ -284,7 +288,7 @@ Time: ${new Date().toISOString()}`;
       data.products.forEach((product, index) => {
         if (!product) return;
         
-        console.log('Processing product:', product); // Debug log udaping
+        console.log('Processing product:', product); // Debug log
         
         const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
@@ -367,7 +371,7 @@ Time: ${new Date().toISOString()}`;
       productList.innerHTML = '<div class="message">Invalid product ID.</div>';
       errorLogEl.innerHTML += `\n\nNo product ID provided in URL`;
     } else {
-      const requestUrl = `${SCRIPT_URL}?v=${encodeURIComponent(productId)}`;
+      const requestUrl = `${SCRIPT_URL}?v=${encodeURIComponent(productId)}&cb=${Date.now()}`;
       errorLogEl.innerHTML += `\n\nFetching data from: ${requestUrl}`;
       
       fetch(requestUrl)
@@ -392,7 +396,5 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
-
-
 
 
