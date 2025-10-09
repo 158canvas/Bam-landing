@@ -246,12 +246,6 @@ Time: ${new Date().toISOString()}`;
         const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
                            product.productName || 
                            "Best Offer";
-        
-        const thumbnail = getSafe(product, 'Images.Primary.Medium.URL') || 
-                         product.thumbnail;
-        
-        const price = getSafe(product, 'Offers.Listings.0.Price.DisplayAmount') || 
-                     product.price;
 
         if (DEBUG) {
           errorLogEl.innerHTML += `\n\nProduct ${index} parsed: ${JSON.stringify({
@@ -259,8 +253,6 @@ Time: ${new Date().toISOString()}`;
             productName,
             amazonIND: product.amazonIND,
             meesho: product.meesho,
-            thumbnail,
-            price,
             hasAmazon,
             hasMeesho
           }, null, 2)}`;
@@ -268,14 +260,8 @@ Time: ${new Date().toISOString()}`;
 
         html += `
           <div class="product">
-            ${thumbnail ? `
-              <div class="product-thumb">
-                <img src="${thumbnail}" alt="${productName}" onerror="this.style.display='none'">
-              </div>
-            ` : ''}
             <div class="product-details">
               <div class="product-name">${productName}</div>
-              ${price ? `<div class="product-price">${price}</div>` : ''}
               <div class="product-links">
                 ${hasAmazon ? `
                   <a href="${product.amazonIND}" onclick="trackClick('${product.productId}', 'amazon')" target="_blank">
@@ -340,6 +326,5 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
-
 
 
