@@ -192,7 +192,7 @@
 
     // Build/version info and backend override for debugging cache/mismatch
     const VERSION = '2025-10-09-1';
-    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXrqSd1o1GVSbahcH4QBC70xR8Yq37ZxIY8JzeO9E3eI61dQK9c2hn3adOOME087A/exec"; // IMPORTANT: replace with your deployed web app URL
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEdjuPjCR0lXUtnaDEjes2xfCYlMY5MnF62nT89kAQtMQ0uZumZV7ENB0Gw7USIzQ/exec"; // IMPORTANT: replace with your deployed web app URL
     const backendOverrideParam = new URLSearchParams(location.search).get("backend");
     const SCRIPT_URL = backendOverrideParam ? decodeURIComponent(backendOverrideParam) : DEFAULT_SCRIPT_URL;
 
@@ -428,6 +428,7 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
+
 
 
 
