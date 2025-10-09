@@ -284,7 +284,7 @@ Time: ${new Date().toISOString()}`;
       data.products.forEach((product, index) => {
         if (!product) return;
         
-        console.log('Processing product:', product); // Debug log
+        console.log('Processing product:', product); // Debug log udaping
         
         const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
         const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
@@ -392,6 +392,7 @@ Time: ${new Date().toISOString()}`;
   </script>
 </body>
 </html>
+
 
 
 
