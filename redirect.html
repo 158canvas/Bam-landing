@@ -190,20 +190,33 @@
       errorLogEl.style.display = 'block';
     }
 
-    // Debug information
+    // Replace with your actual Google Apps Script Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTpm2on_KIKTquKxo-pyp7DxEChN5t_Ig7RU1QNWMteb_3_zFeVcbTHNhyfrv0e_I/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
+
+    // Debug information (placed after SCRIPT_URL is defined)
     errorLogEl.innerHTML = `<strong>Debug Information:</strong>
 Product ID: ${productId || 'NONE'}
 Current URL: ${window.location.href}
-Script URL: ${document.currentScript.src}
+Script URL (backend): ${SCRIPT_URL}
 Time: ${new Date().toISOString()}`;
-
-    // Replace with your actual Google Apps Script Web App URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTpm2on_KIKTquKxo-pyp7DxEChN5t_Ig7RU1QNWMteb_3_zFeVcbTHNhyfrv0e_I/exec"; // IMPORTANT: Replace this with your actual main.txt script's deployed web app URL
 
     function redirectTo(url) {
       if (url && isValidUrl(url)) {
         window.location.href = url;
       }
+    }
+
+    function normalizeUrl(u) {
+      if (typeof u !== 'string') return '';
+      // Trim whitespace and strip surrounding backticks or quotes
+      let s = u.trim();
+      if ((s.startsWith('`') && s.endsWith('`')) || (s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+        s = s.substring(1, s.length - 1).trim();
+      }
+      // Remove stray backticks if only at one side
+      if (s.startsWith('`')) s = s.substring(1).trim();
+      if (s.endsWith('`')) s = s.substring(0, s.length - 1).trim();
+      return s;
     }
 
     function isValidUrl(string) {
@@ -222,6 +235,42 @@ Time: ${new Date().toISOString()}`;
       }, obj);
     }
 
+    function logPayloadDiagnostics(data) {
+      try {
+        if (!data || !Array.isArray(data.products)) {
+          errorLogEl.innerHTML += `\n\nDiagnostics: products array missing or invalid`;
+          return;
+        }
+        const p = data.products[0];
+        if (!p) {
+          errorLogEl.innerHTML += `\n\nDiagnostics: products[0] missing`;
+          return;
+        }
+        const amazonLinks = Array.isArray(p.amazonLinks) ? p.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
+        const meeshoLinks = Array.isArray(p.meeshoLinks) ? p.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
+        const rawLegacyAmazon = typeof p.amazonIND === 'string' ? p.amazonIND : null;
+        const rawLegacyMeesho = typeof p.meesho === 'string' ? p.meesho : null;
+        const legacyAmazon = rawLegacyAmazon ? normalizeUrl(rawLegacyAmazon) : null;
+        const legacyMeesho = rawLegacyMeesho ? normalizeUrl(rawLegacyMeesho) : null;
+        const legacyAmazonValid = legacyAmazon ? isValidUrl(legacyAmazon) : false;
+        const legacyMeeshoValid = legacyMeesho ? isValidUrl(legacyMeesho) : false;
+        const legacyShape = (!amazonLinks.length && !meeshoLinks.length) && (legacyAmazon || legacyMeesho);
+
+        // Summarize primary issue for quick reading
+        let summary = '';
+        if (legacyShape) {
+          summary = '- ERROR: Backend payload is legacy (amazonIND/meesho). Redeploy Apps Script returning arrays (amazonLinks/meeshoLinks) or update SCRIPT_URL to new deployment.';
+        }
+        if (rawLegacyAmazon && (!legacyAmazonValid || legacyAmazon !== rawLegacyAmazon.trim())) {
+          summary += `\n- ERROR: Amazon URL formatting issue (backticks/whitespace). Original: ${JSON.stringify(rawLegacyAmazon)} → Normalized: ${JSON.stringify(legacyAmazon)}`;
+        }
+
+        errorLogEl.innerHTML += `\n\nDiagnostics:\n- amazonLinks: ${amazonLinks.length}\n- meeshoLinks: ${meeshoLinks.length}\n- legacyAmazonIND: ${legacyAmazonValid ? 'valid' : (legacyAmazon ? 'invalid' : 'absent')}\n- legacyMeesho: ${legacyMeeshoValid ? 'valid' : (legacyMeesho ? 'invalid' : 'absent')}\n${summary}`;
+      } catch (e) {
+        errorLogEl.innerHTML += `\n\nDiagnostics error: ${e.toString()}`;
+      }
+    }
+
     function displayProducts(data) {
       console.log('Received data:', data); // Debug log
       
@@ -237,10 +286,16 @@ Time: ${new Date().toISOString()}`;
         
         console.log('Processing product:', product); // Debug log
         
-        const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.filter(isValidUrl) : [];
-        const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.filter(isValidUrl) : [];
+        const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
+        const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
+        const legacyAmazonRaw = product.amazonIND;
+        const legacyMeeshoRaw = product.meesho;
+        const legacyAmazon = typeof legacyAmazonRaw === 'string' ? normalizeUrl(legacyAmazonRaw) : null;
+        const legacyMeesho = typeof legacyMeeshoRaw === 'string' ? normalizeUrl(legacyMeeshoRaw) : null;
+        const legacyAmazonValid = legacyAmazon ? isValidUrl(legacyAmazon) : false;
+        const legacyMeeshoValid = legacyMeesho ? isValidUrl(legacyMeesho) : false;
         
-        if (amazonLinks.length === 0 && meeshoLinks.length === 0) return;
+        if (amazonLinks.length === 0 && meeshoLinks.length === 0 && !legacyAmazon && !legacyMeesho) return;
 
         // Safely extract product data
         const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
@@ -252,7 +307,9 @@ Time: ${new Date().toISOString()}`;
             productId: product.productId,
             productName,
             amazonLinksCount: amazonLinks.length,
-            meeshoLinksCount: meeshoLinks.length
+            meeshoLinksCount: meeshoLinks.length,
+            legacyAmazonPresent: legacyAmazonValid,
+            legacyMeeshoPresent: legacyMeeshoValid
           }, null, 2)}`;
         }
 
@@ -271,6 +328,16 @@ Time: ${new Date().toISOString()}`;
                     🛍 Buy on Meesho ${meeshoLinks.length > 1 ? `#${idx+1}` : ''}
                   </a>
                 `).join('')}
+                ${(!amazonLinks.length && legacyAmazonValid) ? `
+                  <a href="${legacyAmazon}" onclick="trackClick('${product.productId}', 'amazon-legacy')" target="_blank">
+                    🛒 Buy on Amazon
+                  </a>
+                ` : ''}
+                ${(!meeshoLinks.length && legacyMeeshoValid) ? `
+                  <a href="${legacyMeesho}" onclick="trackClick('${product.productId}', 'meesho-legacy')" target="_blank">
+                    🛍 Buy on Meesho
+                  </a>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -313,11 +380,12 @@ Time: ${new Date().toISOString()}`;
         })
         .then(data => {
           errorLogEl.innerHTML += `\n\nReceived data: ${JSON.stringify(data, null, 2).substring(0, 500)}...`;
+          logPayloadDiagnostics(data);
           displayProducts(data);
         })
         .catch(err => {
           const errorMessage = err.toString();
-          errorLogEl.innerHTML += `\n\nFetch error: ${errorMessage}`;
+          errorLogEl.innerHTML += `\n\nFetch error: ${errorMessage}\nRequest URL: ${requestUrl}`;
           productList.innerHTML = `<div class="message">Error loading products: ${errorMessage}</div>`;
         });
     }
