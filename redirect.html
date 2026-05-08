@@ -1,434 +1,69 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Product Offers</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      background-color: #4a90e2;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .container {
-      padding: 1rem;
-      max-width: 700px;
-      margin: auto;
-      flex: 1;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .product {
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .product:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    }
-
-    .product-thumb img {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
-      object-fit: cover;
-    }
-
-    .product-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .product-name {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #222;
-      line-height: 1.4;
-    }
-
-    .product-price {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #e74c3c;
-    }
-
-    .product-links {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .product-links a {
-      padding: 0.6rem 1rem;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 500;
-      color: white;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-      text-align: center;
-      flex: 1;
-      min-width: 140px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .product-links a[href*="amazon"] {
-      background-color: #ff9900;
-    }
-
-    .product-links a[href*="meesho"] {
-      background-color: #8a2be2;
-    }
-
-    .product-links a:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .message {
-      text-align: center;
-      font-size: 1.1rem;
-      color: #666;
-      margin-top: 2rem;
-    }
-
-    .disclaimer {
-      background-color: #fff8e1;
-      border-left: 4px solid #ffc107;
-      padding: 1rem;
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #666;
-      border-radius: 4px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #4a90e2;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 600px) {
-      .product {
-        flex-direction: column;
-        text-align: center;
-        padding: 1rem;
-      }
-      
-      .product-links a {
-        min-width: 120px;
-      }
-      
-      .container {
-        padding: 0.5rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <header>🎁 Available at These Stores</header>
-  <div class="container">
-    <div id="productList">
-      <div class="loading">
-        <div class="spinner"></div>
-        <div>Loading products...</div>
-      </div>
-    </div>
-    <div id="disclaimer" class="disclaimer" style="display: none;"></div>
-    <div id="errorLog" class="disclaimer" style="display: none; background-color: #ffebee; border-left: 4px solid #f44336; margin-top: 20px; white-space: pre-wrap; font-family: monospace; font-size: 12px;"></div>
-  </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
 
   <script>
-    const productId = new URLSearchParams(location.search).get("v");
-    const productList = document.getElementById("productList");
-    const disclaimerEl = document.getElementById("disclaimer");
-    const errorLogEl = document.getElementById("errorLog");
-    const DEBUG = true;
 
-    if (DEBUG) {
-      errorLogEl.style.display = 'none';
-    }
+    // ============================================
+    // GET PRODUCT ID FROM URL
+    // Example:
+    // redirect.html?v=175g
+    // ============================================
 
-    // Build/version info and backend override for debugging cache/mismatch
-    const VERSION = '2025-10-09-1';
-    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEdjuPjCR0lXUtnaDEjes2xfCYlMY5MnF62nT89kAQtMQ0uZumZV7ENB0Gw7USIzQ/exec"; // IMPORTANT: replace with your deployed web app URL
-    const backendOverrideParam = new URLSearchParams(location.search).get("backend");
-    const SCRIPT_URL = backendOverrideParam ? decodeURIComponent(backendOverrideParam) : DEFAULT_SCRIPT_URL;
+    const productId = new URLSearchParams(window.location.search).get("v");
 
-    // Debug information (placed after SCRIPT_URL is defined)
-    errorLogEl.innerHTML = `<strong>Debug Information:</strong>
-Product ID: ${productId || 'NONE'}
-Current URL: ${window.location.href}
-Script URL (backend): ${SCRIPT_URL}
-Build Version: ${VERSION}
-Time: ${new Date().toISOString()}`;
 
-    function redirectTo(url) {
-      if (url && isValidUrl(url)) {
-        window.location.href = url;
-      }
-    }
+    // ============================================
+    // REDIRECT LIST
+    // ADD FUTURE REDIRECTS HERE
+    // ============================================
 
-    function normalizeUrl(u) {
-      if (typeof u !== 'string') return '';
-      // Trim whitespace and strip surrounding backticks or quotes
-      let s = u.trim();
-      if ((s.startsWith('`') && s.endsWith('`')) || (s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
-        s = s.substring(1, s.length - 1).trim();
-      }
-      // Remove stray backticks if only at one side
-      if (s.startsWith('`')) s = s.substring(1).trim();
-      if (s.endsWith('`')) s = s.substring(0, s.length - 1).trim();
-      return s;
-    }
+    const redirectMap = {
 
-    function isValidUrl(string) {
-      try {
-        new URL(string);
-        return true;
-      } catch (_) {
-        return false;
-      }
-    }
+      // CURRENT REDIRECTS
 
-    // Helper function to safely access nested object properties
-    function getSafe(obj, path, defaultValue = null) {
-      return path.split('.').reduce((acc, key) => {
-        return acc && acc[key] !== undefined ? acc[key] : defaultValue;
-      }, obj);
-    }
+      "175g": "https://buzzinbeats.com/ballu/pro-level-repairs-made-easy",
 
-    function logPayloadDiagnostics(data) {
-      try {
-        if (!data || !Array.isArray(data.products)) {
-          errorLogEl.innerHTML += `\n\nDiagnostics: products array missing or invalid`;
-          return;
-        }
-        const p = data.products[0];
-        if (!p) {
-          errorLogEl.innerHTML += `\n\nDiagnostics: products[0] missing`;
-          return;
-        }
-        const offersCount = Array.isArray(p.offers) ? p.offers.length : 0;
-        const amazonLinks = Array.isArray(p.amazonLinks) ? p.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
-        const meeshoLinks = Array.isArray(p.meeshoLinks) ? p.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
-        const rawLegacyAmazon = typeof p.amazonIND === 'string' ? p.amazonIND : null;
-        const rawLegacyMeesho = typeof p.meesho === 'string' ? p.meesho : null;
-        const legacyAmazon = rawLegacyAmazon ? normalizeUrl(rawLegacyAmazon) : null;
-        const legacyMeesho = rawLegacyMeesho ? normalizeUrl(rawLegacyMeesho) : null;
-        const legacyAmazonValid = legacyAmazon ? isValidUrl(legacyAmazon) : false;
-        const legacyMeeshoValid = legacyMeesho ? isValidUrl(legacyMeesho) : false;
-        const legacyShape = (!amazonLinks.length && !meeshoLinks.length) && (legacyAmazon || legacyMeesho);
+      "168t": "https://buzzinbeats.com/ballu/elevate-your-work-save-your-back",
 
-        // Summarize primary issue for quick reading
-        let summary = '';
-        if (legacyShape) {
-          summary = '- ERROR: Backend payload is legacy (amazonIND/meesho). Redeploy Apps Script returning arrays (amazonLinks/meeshoLinks) or update SCRIPT_URL to new deployment.';
-        }
-        if (rawLegacyAmazon && (!legacyAmazonValid || legacyAmazon !== rawLegacyAmazon.trim())) {
-          summary += `\n- ERROR: Amazon URL formatting issue (backticks/whitespace). Original: ${JSON.stringify(rawLegacyAmazon)} → Normalized: ${JSON.stringify(legacyAmazon)}`;
-        }
 
-        errorLogEl.innerHTML += `\n\nDiagnostics:\n- offers: ${offersCount}\n- amazonLinks: ${amazonLinks.length}\n- meeshoLinks: ${meeshoLinks.length}\n- legacyAmazonIND: ${legacyAmazonValid ? 'valid' : (legacyAmazon ? 'invalid' : 'absent')}\n- legacyMeesho: ${legacyMeeshoValid ? 'valid' : (legacyMeesho ? 'invalid' : 'absent')}\n${summary}`;
-      } catch (e) {
-        errorLogEl.innerHTML += `\n\nDiagnostics error: ${e.toString()}`;
-      }
-    }
+      // ========================================
+      // FUTURE REDIRECTS
+      // ADD MORE BELOW
+      // ========================================
 
-    function displayProducts(data) {
-      console.log('Received data:', data); // Debug log
-      
-      if (!data || !Array.isArray(data.products) || data.products.length === 0) {
-        productList.innerHTML = '<div class="message">No products found.</div>';
-        return;
-      }
+      // "abc123": "https://yourwebsite.com/page",
 
-      let html = '';
-      
-      data.products.forEach((product, index) => {
-        if (!product) return;
-        
-        console.log('Processing product:', product); // Debug log
-        
-        const offers = Array.isArray(product.offers) ? product.offers : [];
-        const amazonLinks = Array.isArray(product.amazonLinks) ? product.amazonLinks.map(normalizeUrl).filter(isValidUrl) : [];
-        const meeshoLinks = Array.isArray(product.meeshoLinks) ? product.meeshoLinks.map(normalizeUrl).filter(isValidUrl) : [];
-        const legacyAmazonRaw = product.amazonIND;
-        const legacyMeeshoRaw = product.meesho;
-        const legacyAmazon = typeof legacyAmazonRaw === 'string' ? normalizeUrl(legacyAmazonRaw) : null;
-        const legacyMeesho = typeof legacyMeeshoRaw === 'string' ? normalizeUrl(legacyMeeshoRaw) : null;
-        const legacyAmazonValid = legacyAmazon ? isValidUrl(legacyAmazon) : false;
-        const legacyMeeshoValid = legacyMeesho ? isValidUrl(legacyMeesho) : false;
-        
-        const hasAny = offers.length > 0 || amazonLinks.length > 0 || meeshoLinks.length > 0 || legacyAmazon || legacyMeesho;
-        if (!hasAny) return;
+      // "new999": "https://buzzinbeats.com/new-page",
 
-        // Safely extract product data
-        const productName = getSafe(product, 'ItemInfo.Title.DisplayValue') || 
-                           product.productName || 
-                           "Best Offer";
+    };
 
-        if (DEBUG) {
-          errorLogEl.innerHTML += `\n\nProduct ${index} parsed: ${JSON.stringify({
-            productId: product.productId,
-            productName,
-            offersCount: offers.length,
-            amazonLinksCount: amazonLinks.length,
-            meeshoLinksCount: meeshoLinks.length,
-            legacyAmazonPresent: legacyAmazonValid,
-            legacyMeeshoPresent: legacyMeeshoValid
-          }, null, 2)}`;
-        }
 
-        // Prefer structured offers with titles; fall back to aggregated arrays
-        if (offers.length > 0) {
-          const offerBlocks = offers.map((offer, oidx) => {
-            const offerTitle = (offer && offer.title) ? offer.title : productName;
-            const a = offer && offer.amazon ? normalizeUrl(offer.amazon) : null;
-            const m = offer && offer.meesho ? normalizeUrl(offer.meesho) : null;
-            const aValid = a ? isValidUrl(a) : false;
-            const mValid = m ? isValidUrl(m) : false;
-            if (!aValid && !mValid) return '';
-            return `
-              <div class="product">
-                <div class="product-details">
-                  <div class="product-name">${offerTitle}</div>
-                  <div class="product-links">
-                    ${aValid ? `
-                      <a href="${a}" onclick="trackClick('${product.productId}', 'amazon-offer-${oidx+1}')" target="_blank">🛒 Buy on Amazon</a>
-                    ` : ''}
-                    ${mValid ? `
-                      <a href="${m}" onclick="trackClick('${product.productId}', 'meesho-offer-${oidx+1}')" target="_blank">🛍 Buy on Meesho</a>
-                    ` : ''}
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('');
-          html += offerBlocks;
-        } else {
-          html += `
-            <div class="product">
-              <div class="product-details">
-                <div class="product-name">${productName}</div>
-                <div class="product-links">
-                  ${amazonLinks.map((link, idx) => `
-                    <a href="${link}" onclick="trackClick('${product.productId}', 'amazon-${idx+1}')" target="_blank">
-                      🛒 Buy on Amazon ${amazonLinks.length > 1 ? `#${idx+1}` : ''}
-                    </a>
-                  `).join('')}
-                  ${meeshoLinks.map((link, idx) => `
-                    <a href="${link}" onclick="trackClick('${product.productId}', 'meesho-${idx+1}')" target="_blank">
-                      🛍 Buy on Meesho ${meeshoLinks.length > 1 ? `#${idx+1}` : ''}
-                    </a>
-                  `).join('')}
-                  ${(!amazonLinks.length && legacyAmazonValid) ? `
-                    <a href="${legacyAmazon}" onclick="trackClick('${product.productId}', 'amazon-legacy')" target="_blank">
-                      🛒 Buy on Amazon
-                    </a>
-                  ` : ''}
-                  ${(!meeshoLinks.length && legacyMeeshoValid) ? `
-                    <a href="${legacyMeesho}" onclick="trackClick('${product.productId}', 'meesho-legacy')" target="_blank">
-                      🛍 Buy on Meesho
-                    </a>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          `;
-        }
-      });
+    // ============================================
+    // AUTO REDIRECT
+    // ============================================
 
-      if (html === '') {
-        productList.innerHTML = '<div class="message">No valid links found.</div>';
-        return;
-      }
+    if (productId && redirectMap[productId]) {
 
-      productList.innerHTML = html;
-      
-      // Display disclaimer
-      if (data.disclaimer) {
-        disclaimerEl.textContent = data.disclaimer;
-        disclaimerEl.style.display = 'block';
-      }
-    }
+      window.location.replace(redirectMap[productId]);
 
-    function trackClick(productId, platform) {
-      // Add analytics tracking here if needed
-      console.log(`Clicked ${platform} for product ${productId}`);
-    }
-
-    if (!productId) {
-      productList.innerHTML = '<div class="message">Invalid product ID.</div>';
-      errorLogEl.innerHTML += `\n\nNo product ID provided in URL`;
     } else {
-      const requestUrl = `${SCRIPT_URL}?v=${encodeURIComponent(productId)}&cb=${Date.now()}`;
-      errorLogEl.innerHTML += `\n\nFetching data from: ${requestUrl}`;
-      
-      fetch(requestUrl)
-        .then(res => {
-          errorLogEl.innerHTML += `\n\nResponse status: ${res.status} ${res.statusText}`;
-          if (!res.ok) {
-            throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          errorLogEl.innerHTML += `\n\nReceived data: ${JSON.stringify(data, null, 2).substring(0, 500)}...`;
-          logPayloadDiagnostics(data);
-          displayProducts(data);
-        })
-        .catch(err => {
-          const errorMessage = err.toString();
-          errorLogEl.innerHTML += `\n\nFetch error: ${errorMessage}\nRequest URL: ${requestUrl}`;
-          productList.innerHTML = `<div class="message">Error loading products: ${errorMessage}</div>`;
-        });
+
+      // OPTIONAL FALLBACK
+      // If no redirect exists
+
+      document.body.innerHTML = "";
+
     }
+
   </script>
+
+</head>
+
+<body>
 </body>
 </html>
-
-
-
-
